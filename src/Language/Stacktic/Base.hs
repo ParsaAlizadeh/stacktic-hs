@@ -9,11 +9,12 @@ module Language.Stacktic.Base
   , nil, lift, run, pure
   , drop
   , lift_
-  , dowhile
+  , dowhile, thenelse
   , fix
   , apply
   , kleisliapply, kleislilift
   , pureapply, pureapply2, purelift, purelift2
+  , when
   ) where
 
 import Prelude (Bool(..), (.))
@@ -64,6 +65,11 @@ dowhile body = do
   b <- body
   if b then dowhile body else nil
 
+thenelse :: P.Monad m => (y -> m z) -> (y -> m z) -> ((y, Bool) -> m z)
+thenelse thenbody elsebody = do
+  b <- nil
+  if b then thenbody else elsebody
+
 fix :: P.MonadFix m => (a -> (x -> m (y, a))) -> (x -> m (y, a))
 fix f x = P.mfix (\ ~(_, a) -> f a x)
 
@@ -102,3 +108,6 @@ kleislilift :: P.Monad m => (t -> m a) -> ((y, t) -> m (y, a))
 kleislilift f = do
   pure f
   kleisliapply
+
+when :: P.Applicative m => Bool -> (x -> m x) -> (x -> m x)
+when cnd body = if cnd then body else nil
