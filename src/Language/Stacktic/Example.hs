@@ -10,8 +10,8 @@ import Control.Monad.Cont
 import Control.Monad.Except
 import Control.Monad.IO.Class
 import Data.Void
-import Debug.Trace
 
+-- | Return all subsets of a given set.
 subsets :: (y, [a]) -> [(y, [a])]
 subsets = S.do
   xs <- S.nil
@@ -22,6 +22,7 @@ subsets = S.do
     ys <- S.nil
     S.lift [x : ys, ys]
 
+-- | Return all increasing subsequences of a given sequence. 
 increasingsubseqs :: (Bounded a, Ord a) => (y, [a]) -> [(y, [a])]
 increasingsubseqs = S.do
   xs <- S.nil
@@ -37,6 +38,7 @@ increasingsubseqs = S.do
   (_, ys) <- S.nil
   S.pure (reverse ys)
 
+-- | Check if all elements of a list are 'True'. Uses 'Language.Stacktic.Base.callCC'.
 allcont :: Monad m => (y, [Bool]) -> m (y, Bool)
 allcont = evalContT . S.callCC \kont -> S.do
   S.for_ S.do
@@ -46,6 +48,8 @@ allcont = evalContT . S.callCC \kont -> S.do
       kont
   S.pure True
 
+-- | Zip the function 'div' over elements of two list. Uses 'Language.Stacktic.Base.throwError' and
+-- 'Language.Stacktic.Base.catchError' to avoid divide by zero error.
 divzip :: (MonadError y m, Integral b) => ((y, [b]), [b]) -> m (y, [b])
 divzip = go `S.catchError` S.do { S.pure [] } where
   go = S.do
@@ -58,6 +62,7 @@ divzip = go `S.catchError` S.do { S.pure [] } where
         S.throwError
       S.pure (x `div` y)
 
+-- | A greeter that is stubborn to know your name. Uses 'Language.Stacktic.Base.label' to loop.
 stubborngreeting :: MonadIO m => y -> m (y, Int)
 stubborngreeting = evalContT . S.do
   S.liftIO_ . putStrLn $ "Hello there. What is your name?"
@@ -71,6 +76,8 @@ stubborngreeting = evalContT . S.do
     back
   S.liftIO_ . putStrLn $ "Welcome " <> name
 
+-- | A phonebook that supports @save@ and @undo@ operations. Uses 'Language.Stacktic.Base.label' to
+-- store jump points in the stack.
 phonebook :: MonadIO m => y -> m (y, [String])
 phonebook = evalContT . S.do
   S.pure (0 :: Int)
@@ -112,13 +119,15 @@ phonebook = evalContT . S.do
   S.drop
   S.pure xs
 
--- undoer :: MonadCont m => 
---   (
---     (((x, Int), (x, Int) -> m (z, Void)) -> m ((x, Int), (x, Int) -> m (z, Void)))
---     -> (((x, Int), (x, Int) -> m (z, Void)) -> m y)
---     -> ((x, Int), (x, Int) -> m (z, Void)) -> m (((x, Int), (x, Int) -> m (z, Void)), a)
---   )
---   -> (x -> m (x, a))
+-- | Generalized version of 'phonebook'. Provides @save@ and @undo@ facility inside a body. You can
+-- safely ignore the type of this function and only look at 'phonebook''.
+undoer :: MonadCont m => 
+  (
+    (((x, Int), (x, Int) -> m (z, Void)) -> m ((x, Int), (x, Int) -> m (z, Void)))
+    -> (((x, Int), (x, Int) -> m (z, Void)) -> m y)
+    -> ((x, Int), (x, Int) -> m (z, Void)) -> m (((x, Int), (x, Int) -> m (z, Void)), a)
+  )
+  -> (x -> m (x, a))
 undoer f = S.do
   S.pure (0 :: Int)
   S.label
@@ -145,6 +154,7 @@ undoer f = S.do
       lab
       S.absurd
 
+-- | Same as 'phonebook', using 'undoer' to simplify the logic of function.
 phonebook' :: MonadIO m => y -> m (y, [String])
 phonebook' = evalContT . undoer \save undo -> S.do
   S.pure []

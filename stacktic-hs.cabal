@@ -61,12 +61,12 @@ library
     -- Modules exported by the library.
     exposed-modules:
         Language.Stacktic,
+        Language.Stacktic.Base,
+        Language.Stacktic.Library,
         Language.Stacktic.Example,
 
     -- Modules included in this library but not exported.
     other-modules:
-        Language.Stacktic.Base,
-        Language.Stacktic.Library,
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

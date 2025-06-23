@@ -8,6 +8,7 @@ import Prelude hiding (length, sum)
 import qualified Language.Stacktic.Base as S
 import Control.Monad.Fix
 
+-- | Calculate n\'th Fibonacci number, using 'Language.Stacktic.Base.fix'.
 fibfix :: (MonadFix m, Ord a, Num a) => (y, a) -> m (y, a)
 fibfix = S.do
   S.fix \fib -> S.pure S.do
@@ -22,6 +23,7 @@ fibfix = S.do
         S.pure (a + b)
   S.apply
 
+-- | Calculate n\'th Fibonacci number, using 'Language.Stacktic.Base.dowhile'.
 fib :: (Monad m, Eq a1, Num a1, Num a2) => (y, a1) -> m (y, a2)
 fib = S.do
   n <- S.nil
@@ -44,6 +46,7 @@ fib = S.do
   S.drop
   S.drop
 
+-- | Map S Monad function over the elements of the input list, returning the resulting list.
 for :: Monad m => ((y, a) -> m (y, b)) -> ((y, [a]) -> m (y, [b]))
 for f = S.do
   xs <- S.nil
@@ -54,6 +57,7 @@ for f = S.do
       as <- S.pure ys S.>> for f
       S.pure (a : as)
 
+-- | Map S Monad function over the elements of the input list with no output.
 for_ :: Monad m => ((y, a) -> m y) -> ((y, [a]) -> m y)
 for_ f = S.do
   xs <- S.nil
@@ -63,6 +67,7 @@ for_ f = S.do
       S.pure y S.>> f
       S.pure ys S.>> for_ f
 
+-- | Sum of elements of the input list.
 sum :: (Monad m, Num a) => (y, [a]) -> m (y, a)
 sum = S.do
   xs <- S.nil
@@ -70,6 +75,7 @@ sum = S.do
   S.pure xs
   for_ (S.purelift2 (+))
 
+-- | Length of the input list.
 length :: (Monad m, Num b) => (y, [a]) -> m (y, b)
 length = S.do
   xs <- S.nil
@@ -79,12 +85,14 @@ length = S.do
     S.drop
     S.purelift (+ 1)
 
+-- | Duplicate the top element of the stack.
 dup :: Monad m => (y, a) -> m ((y, a), a)
 dup = S.do
   x <- S.nil
   S.pure x
   S.pure x
 
+-- | Swap the top two elements of the stack.
 swap :: Monad m => ((y, a), b) -> m ((y, b), a)
 swap = S.do
   x <- S.nil
@@ -92,6 +100,7 @@ swap = S.do
   S.pure x
   S.pure y
 
+-- | Get the value on top of stack wihtout removing it from the stack.
 with :: Monad m => (t -> (y, t) -> m z) -> (y, t) -> m z
 with f = S.do
   a <- S.nil
