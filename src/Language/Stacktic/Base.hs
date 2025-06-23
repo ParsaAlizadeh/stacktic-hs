@@ -20,6 +20,7 @@ module Language.Stacktic.Base
   , translift, translift_
   , liftIO, liftIO_
   , get, put, state
+  , absurd
   ) where
 
 import Prelude (Bool(..), (.))
@@ -29,6 +30,7 @@ import qualified Control.Monad.Fix as P
 import qualified Control.Monad.Cont as P
 import qualified Control.Monad.Except as P
 import qualified Control.Monad.Trans as P
+import qualified Data.Void as P
 
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse cnd bthen belse = case cnd of
@@ -153,3 +155,6 @@ put (_, y) = P.pure y
 
 state :: P.Applicative m => (x -> y) -> (x -> m y)
 state f = P.pure . f
+
+absurd :: (x, P.Void) -> t
+absurd (_, x) = P.absurd x
