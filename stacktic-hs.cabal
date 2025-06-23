@@ -74,6 +74,7 @@ library
     -- Other library packages from which modules are imported.
     build-depends:    
         base ^>=4.21.0.0,
+        mtl >= 2.3 && < 2.4,
 
     -- Directories containing source files.
     hs-source-dirs:   src

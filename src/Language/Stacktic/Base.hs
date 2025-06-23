@@ -15,12 +15,20 @@ module Language.Stacktic.Base
   , kleisliapply, kleislilift
   , pureapply, pureapply2, purelift, purelift2
   , when
+  , callCC, label
+  , throwError, catchError
+  , translift, translift_
+  , liftIO, liftIO_
+  , get, put, state
   ) where
 
 import Prelude (Bool(..), (.))
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Control.Monad.Fix as P
+import qualified Control.Monad.Cont as P
+import qualified Control.Monad.Except as P
+import qualified Control.Monad.Trans as P
 
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse cnd bthen belse = case cnd of
@@ -111,3 +119,37 @@ kleislilift f = do
 
 when :: P.Applicative m => Bool -> (x -> m x) -> (x -> m x)
 when cnd body = if cnd then body else nil
+
+callCC :: P.MonadCont m => ((x -> m y) -> (z -> m x)) -> (z -> m x)
+callCC f z = P.callCC \h -> f h z
+
+label :: P.MonadCont m => x -> m (x, x -> m y)
+label x = (\(m, x) -> (x, m)) P.<$> P.label x
+
+throwError :: P.MonadError e m => e -> m y
+throwError = P.throwError
+
+catchError :: P.MonadError e m => (x -> m y) -> (e -> m y) -> (x -> m y)
+catchError trybody catchbody x =
+  P.catchError (trybody x) catchbody
+
+translift :: (P.MonadTrans t, P.Monad m) => m a -> x -> t m (x, a)
+translift = lift . P.lift
+
+translift_ :: (P.MonadTrans t, P.Monad m) => m a -> x -> t m x
+translift_ = lift_ . P.lift
+
+liftIO :: P.MonadIO m => P.IO a -> x -> m (x, a)
+liftIO = lift . P.liftIO
+
+liftIO_ :: P.MonadIO m => P.IO a -> x -> m x
+liftIO_ = lift_ . P.liftIO
+
+get :: P.Applicative m => x -> m (x, x)
+get x = P.pure (x, x)
+
+put :: P.Applicative m => (x, y) -> m y
+put (_, y) = P.pure y
+
+state :: P.Applicative m => (x -> y) -> (x -> m y)
+state f = P.pure . f
