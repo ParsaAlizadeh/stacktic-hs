@@ -134,9 +134,8 @@ The syntax can be written to look like a postfix S-expression.
 
 The idea of Stacktic was to assign a type to each expression.
 Each type looks like this:
-$$
-[ A_1 , A_2 , \ldots , A_n ] \to [ B_1 , B_2 , \ldots , B_m ]
-$$
+$$[ A_1 , A_2 , \ldots , A_n ] \to [ B_1 , B_2 , \ldots , B_m ]$$
+
 Meaning, if the stack had elements $A_1 , \ldots , A_n$ on top ($A_n$ being the top most element),
  then by executing the given expression on the stack,
  it removes the $n$ element with types $A_n, \ldots, A_2, A_1$ from the stack
@@ -181,9 +180,7 @@ Other extensions, such as `then ... else ...` consuming a boolean value,
  are straightforward.
 
 We can add parametric polymorphism by considering expression types to have the form:
-$$
-\forall \alpha_1,\ldots,\alpha_k \quad [A_1, \ldots, A_n] \to [B_1, \ldots, B_m]
-$$
+$$\forall \alpha_1,\ldots,\alpha_k \quad [A_1, \ldots, A_n] \to [B_1, \ldots, B_m]$$
 where each $A_i$ and $B_i$ may mention parametric types $\alpha_j$.
 Rules of instantiating and generalizing follow from the Hindley-Milner type system.
 
