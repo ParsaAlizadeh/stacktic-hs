@@ -2,7 +2,13 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module Language.Stacktic.Library where
+module Language.Stacktic.Library 
+  ( fibfix
+  , fib
+  , for, for_
+  , sum, length
+  , dup, swap, with
+  ) where
 
 import Prelude hiding (length, sum)
 import qualified Language.Stacktic.Base as S
