@@ -1,33 +1,39 @@
 {-# LANGUAGE QualifiedDo #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE BangPatterns #-}
 
 module Main (main) where
 
 import Test.Hspec
+import Test.QuickCheck
+import Test.Hspec.QuickCheck
 
 import Data.Functor.Identity
 import qualified Language.Stacktic as S
 
-unS :: (() -> IO ()) -> IO ()
-unS f = f ()
+fib :: Integer -> Integer
+fib n = go n 0 1 where
+  go 0 !a _ = a
+  go n !a !b = go (n - 1) b (a + b)
+
+chooseNonNegative :: Integer -> Gen Integer
+chooseNonNegative n = chooseInteger (0, n)
 
 main :: IO ()
 main = hspec do
   describe "library" do
     describe "fib" do
-      it "calculates n'th fib number" do
-        runIdentity (S.fib ((), 2 :: Integer))
-          `shouldBe` ((), 1 :: Integer)
-        runIdentity (S.fib ((), 10 :: Integer)) 
-          `shouldBe` ((), 55 :: Integer)
+      prop "calculates n'th fib number" $
+        forAll (chooseNonNegative 1000) \n ->
+          runIdentity (S.fib ((), n)) == ((), fib n)
     describe "fibfix" do
-      it "calculates n'th fib number, using y combinator" $ unS S.do
-        x :: Integer <- S.pure (2 :: Integer) S.>> S.fib
-        S.lift_ $ x `shouldBe` 1
-        y :: Integer <- S.pure (10 :: Integer) S.>> S.fib
-        S.lift_ $ y `shouldBe` 55
+      prop "calculates n'th fib number, using y combinator" $ 
+        forAll (chooseNonNegative 20) \n ->
+          runIdentity (S.fibfix ((), n)) == ((), fib n)
     describe "sum" do
-      it "finds sum of elements in a list" $ unS S.do
-        x :: Integer <- S.pure [1 :: Integer, 4, 10] S.>> S.sum
-        S.lift_ $ x `shouldBe` 15
+      prop "same as Prelude.sum" \ (xs :: [Integer]) ->
+        runIdentity (S.sum ((), xs)) == ((), sum xs)
+    describe "length" do
+      prop "same as Prelude.length" \ (xs :: [()]) ->
+        runIdentity (S.length ((), xs)) == ((), length xs)

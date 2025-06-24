@@ -109,3 +109,4 @@ test-suite stacktic-hs-test
         base,
         stacktic-hs,
         hspec,
+        QuickCheck,
