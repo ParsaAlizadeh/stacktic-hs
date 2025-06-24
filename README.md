@@ -136,7 +136,7 @@ The idea of Stacktic was to assign a type to each expression.
 Each type looks like this:
 $$[ A_1 , A_2 , \ldots , A_n ] \to [ B_1 , B_2 , \ldots , B_m ]$$
 
-Meaning, if the stack had elements $A_1 , \ldots , A_n$ on top ($A_n$ being the top most element),
+Meaning, if the stack had elements $A_1 , \ldots , A_n$ on top ($A_n$ being the topmost element),
  then by executing the given expression on the stack,
  it removes the $n$ element with types $A_n, \ldots, A_2, A_1$ from the stack
  and pushes $m$ element with types $B_1, B_2, \ldots, B_m$ onto the stack
