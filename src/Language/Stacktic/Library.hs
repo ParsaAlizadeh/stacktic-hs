@@ -1,6 +1,7 @@
 {-# LANGUAGE QualifiedDo #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Language.Stacktic.Library 
   ( fibfix
@@ -8,6 +9,7 @@ module Language.Stacktic.Library
   , for, for_
   , sum, length
   , dup, swap, with
+  , rotate3
   ) where
 
 import Prelude hiding (length, sum)
@@ -95,16 +97,13 @@ length = S.do
 dup :: Monad m => (y, a) -> m ((y, a), a)
 dup = S.do
   x <- S.nil
-  S.pure x
-  S.pure x
+  $(S.pureN 2) (x, x)
 
 -- | Swap the top two elements of the stack.
 swap :: Monad m => ((y, a), b) -> m ((y, b), a)
 swap = S.do
-  x <- S.nil
-  y <- S.nil
-  S.pure x
-  S.pure y
+  (x, y) <- $(S.letN 2)
+  $(S.pureN 2) (y, x)
 
 -- | Get the value on top of stack wihtout removing it from the stack.
 with :: Monad m => (t -> (y, t) -> m z) -> (y, t) -> m z
@@ -112,3 +111,8 @@ with f = S.do
   a <- S.nil
   S.pure a
   f a
+
+rotate3 :: Monad m => (((y, b1), b2), b3) -> m (((y, b3), b1), b2)
+rotate3 = S.do
+  (x, y, z) <- $(S.letN 3)
+  $(S.pureN 3) (y, z, x)

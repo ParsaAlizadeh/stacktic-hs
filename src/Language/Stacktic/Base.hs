@@ -3,6 +3,7 @@
 {-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE QualifiedDo #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Language.Stacktic.Base
   ( (>>), (>>=), (>=>)
@@ -21,9 +22,10 @@ module Language.Stacktic.Base
   , liftIO, liftIO_
   , get, put, state
   , absurd
+  , letN, pureN
   ) where
 
-import Prelude (Bool(..), (.))
+import Prelude (Bool(..), (.), fromInteger, Int, ($))
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Control.Monad.Fix as P
@@ -31,8 +33,9 @@ import qualified Control.Monad.Cont as P
 import qualified Control.Monad.Except as P
 import qualified Control.Monad.Trans as P
 import qualified Data.Void as P
+import Language.Haskell.TH
 
--- | RebindableSyntax need this
+-- | defined for RebindableSyntax
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse cnd bthen belse = case cnd of
   True -> bthen
@@ -213,3 +216,27 @@ state f = P.pure . f
 -- | The @absurd@ function for the top element of the stack.
 absurd :: (x, P.Void) -> t
 absurd (_, x) = P.absurd x
+
+-- | @$('letN' 2) = \((x, b), a) -> (x, m (a, b))@
+letN :: Int -> Q Exp
+letN n | n P.>= 0 = P.do
+  stack <- newName "x"
+  names <- P.mapM (newName . ('a' :) . P.show) [1..n]
+  let mkPat [] = varP stack
+      mkPat (a : names) = tupP [mkPat names, varP a]
+      pat = mkPat names
+      expr = tupE [varE stack, tupE (P.map varE names)]
+  [| \ $pat -> P.pure $expr |]
+letN n = P.fail $ "letN: N must be non-negative, got " P.<> P.show n
+
+-- | @$('pureN' 2) = \(a, b) -> (x -> m ((x, b), a))@
+pureN :: Int -> Q Exp
+pureN n | n P.>= 0 = P.do
+  stack <- newName "x"
+  names <- P.mapM (newName . ('a' :) . P.show) [1..n]
+  let pat = tupP (P.map varP names)
+      mkExpr [] = varE stack
+      mkExpr (a : names) = tupE [mkExpr names, varE a]
+      expr = mkExpr names
+  [| \ $pat $(varP stack) -> P.pure $expr |]
+pureN n = P.fail $ "pureN: N must be non-negative, got " P.<> P.show n
