@@ -466,12 +466,13 @@ The author focuses on a language with a set of combinators, which makes it diffe
  because of our use of the `let` expression.
 However, he mentions the main limitation of implementing S monad in Haskell:
 > Cat cannot be embedded in languages which only support rank-1 polymorphic types (e.g. Haskell, ML).
-> Short version is that these languages can't properly infer the type of the expression quote dup.
+> Short version is that these languages can't properly infer the type of the expression `quote dup`.
 > For more information and demonstration see [the type-inference repository](https://github.com/cdiggins/type-inference?tab=readme-ov-file#compared-to-haskell).
+
 Although Haskell does support Rank-N types, the issue is the lack of [impredicative types](https://downloads.haskell.org/ghc/9.0.1/docs/html/users_guide/exts/impredicative_types.html#impredicative-polymorphism).
 The function `quote` needs to be of type:
 ```hs
-quote :: a -> m (x, forall y. y -> m (y, a))
+quote :: Monad m => a -> m (x, forall y. y -> m (y, a))
 ```
 This is possible using the `ImpredicativeTypes` extension, but it comes with a lot of troubles.
 Haskell has new plans for impredicativity, which I mention here.
