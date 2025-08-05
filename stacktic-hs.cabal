@@ -64,6 +64,8 @@ library
         Language.Stacktic.Base,
         Language.Stacktic.Library,
         Language.Stacktic.Example,
+        Language.Stacktic.Linear,
+        Language.Stacktic.Linear.Example,
 
     -- Modules included in this library but not exported.
     other-modules:
@@ -76,6 +78,7 @@ library
         base ^>=4.21.0.0,
         mtl >= 2.3 && < 2.4,
         template-haskell >= 2.23 && < 2.24,
+        linear-base >= 0.5 && < 0.6,
 
     -- Directories containing source files.
     hs-source-dirs:   src
