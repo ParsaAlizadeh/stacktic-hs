@@ -64,8 +64,11 @@ library
         Language.Stacktic.Base,
         Language.Stacktic.Library,
         Language.Stacktic.Example,
-        Language.Stacktic.Linear,
+        Language.Stacktic.Linear.Base,
+        Language.Stacktic.Linear.Library,
         Language.Stacktic.Linear.Example,
+        Control.Monad.Linear.Cont,
+        Control.Monad.Linear.Identity,
 
     -- Modules included in this library but not exported.
     other-modules:
