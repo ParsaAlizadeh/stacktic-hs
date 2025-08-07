@@ -13,7 +13,10 @@
 module Language.Stacktic.Linear.Base where
 
 import Prelude.Linear
-  ( (.), Consumable(..), Bool(..), ($) )
+  ( (.), Consumable, Bool(..), ($), Dupable, Movable )
+import qualified Prelude.Linear as P
+import Control.Functor.Linear
+  ( Monad, Applicative )
 import qualified Control.Functor.Linear as Control
 import Control.Monad.Linear.Cont
   ( Cont, ContT(..) )
@@ -27,7 +30,7 @@ import qualified Control.Monad.Linear.Cont as Cont
   y <- f x
   g y
 
-(>>=) :: Control.Monad m
+(>>=) :: Monad m
   => (x %1 -> m (y, a)) %1
   -> (a %1 -> (y %1 -> m z)) %1
   -> (x %1 -> m z)
@@ -35,36 +38,56 @@ import qualified Control.Monad.Linear.Cont as Cont
   (y, a) <- f x
   h a y
 
-(>=>) :: Control.Monad m
+(>=>) :: Monad m
   => (a %1 -> (x %1 -> m (y, b))) %1
   -> (b %1 -> (y %1 -> m z)) %1
   -> (a %1 -> (x %1 -> m z))
 (>=>) f g a = f a >>= g
 
-nil :: Control.Applicative m => x %1 -> m x
+nil :: Applicative m => x %1 -> m x
 nil = Control.pure
 
-lift :: Control.Applicative m => m a %1 -> (x %1 -> m (x, a))
+lift :: Applicative m => m a %1 -> (x %1 -> m (x, a))
 lift ma x = Control.pure (x,) Control.<*> ma
 
-run :: Control.Applicative m => (x, m a) %1 -> m (x, a)
+run :: Applicative m => (x, m a) %1 -> m (x, a)
 run (x, ma) = lift ma x
 
-pure :: Control.Applicative m => a %1 -> (x %1 -> m (x, a))
+pure :: Applicative m => a %1 -> (x %1 -> m (x, a))
 pure = lift . Control.pure
 
-drop :: (Control.Monad m, Consumable a) => (x, a) %1 -> m x
+drop :: (Monad m, Consumable a) => (x, a) %1 -> m x
 drop = do
   a <- nil
-  case consume a of
+  case P.consume a of
     () -> nil
 
-apply :: Control.Monad m => (y, y %1 -> m z) %1 -> m z
+dup :: (Monad m, Dupable a) => (y, a) %1 -> m ((y, a), a)
+dup = do
+  a <- nil
+  case P.dup2 a of
+    (a1, a2) -> do
+      pure a1
+      pure a2
+
+move :: (Monad m, Movable a) => (y, a) %1 -> m (y, P.Ur a)
+move = do
+  a <- nil
+  pure (P.move a)
+
+swap :: Monad m => ((y, a1), a2) %1 -> m ((y, a2), a1)
+swap = do
+  a <- nil
+  b <- nil
+  pure a
+  pure b
+
+apply :: Monad m => (y, y %1 -> m z) %1 -> m z
 apply = do
   f <- nil
   f
 
-when :: Control.Applicative m => Bool %1 -> (x %1 -> m x) -> x %1 -> m x
+when :: Applicative m => Bool %1 -> (x %1 -> m x) -> x %1 -> m x
 when cnd body =
   case cnd of
     True -> body
@@ -72,3 +95,6 @@ when cnd body =
 
 mkContT :: ((a %1 -> m r) %1 -> m r) %1 -> x %1 -> ContT r m (x, a)
 mkContT f x = Control.fmap (x,) $ ContT f
+
+runCont :: (x %p -> Cont r r) %1 -> x %p -> r
+runCont f x = Cont.runCont (f x) P.id

@@ -115,9 +115,3 @@ arraySlice i n = S.do
 
 arrayToList :: Monad m => (y, Array a) %1 -> m (y, Ur [a])
 arrayToList = purelift Array.toList
-
--- evalContT :: Applicative m => (t %1 -> ContT r m r) %1 -> t %1 -> m r
--- evalContT f x = Cont.evalContT (f x)
-
--- evalCont :: (x %1 -> Cont (Identity b) (Identity b)) %1 -> x %1 -> b
--- evalCont f x = runIdentity $ Cont.evalCont (f x)
