@@ -19,23 +19,26 @@ import Control.Monad.Linear.Cont
 fib :: Movable y => (y, Ur Int) %1 -> (y, Ur Integer)
 fib = S.runCont S.do
   Ur n <- S.nil
-  S.arrayAlloc (n + 1) (0 :: Integer)
-  S.pure (Ur 2)
-  S.dowhile S.do
-    Ur i <- S.nil
-    if i <= n then S.do
-      Ur a <- S.arrayGet (i - 2)
-      Ur b <- S.arrayGet (i - 1)
-      S.arraySet i (a + b)
-      S.pure $ Ur (i + 1)
-      S.pure True
-    else S.do
-      S.pure (Ur i)
-      S.pure False
-  S.drop
-  Ur fn <- S.arrayGet n
-  S.drop
-  S.pure (Ur fn)
+  if n <= 1 then S.pure $ Ur $ fromIntegral n else S.do
+    S.arrayAlloc (n + 1) (0 :: Integer)
+    S.arraySet 0 0
+    S.arraySet 1 1
+    S.pure (Ur 2)
+    S.dowhile S.do
+      Ur i <- S.nil
+      if i <= n then S.do
+        Ur a <- S.arrayGet (i - 2)
+        Ur b <- S.arrayGet (i - 1)
+        S.arraySet i (a + b)
+        S.pure $ Ur (i + 1)
+        S.pure True
+      else S.do
+        S.pure (Ur i)
+        S.pure False
+    S.drop
+    Ur fn <- S.arrayGet n
+    S.drop
+    S.pure (Ur fn)
 
 for :: Monad m => ((y, a) %1 -> m (y, b)) -> (y, [a]) %1 -> m (y, [b])
 for f = S.do

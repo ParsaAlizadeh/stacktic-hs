@@ -117,3 +117,18 @@ test-suite stacktic-hs-test
         stacktic-hs,
         hspec,
         QuickCheck,
+
+test-suite stacktic-hs-linear-test
+    import:           warnings
+    default-language: Haskell2010
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Linear.hs
+    build-depends:
+        base,
+        stacktic-hs,
+        hspec,
+        QuickCheck,
+        linear-base,

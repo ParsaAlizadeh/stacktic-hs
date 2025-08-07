@@ -11,8 +11,8 @@ import qualified Data.Functor.Identity as Old
 import Data.Bifunctor.Linear
 
 newtype Identity a = Identity (Old.Identity a)
-  deriving Data.Functor via Data Identity
-  deriving Data.Applicative via Data Identity
+  deriving Data.Functor via Old.Identity
+  deriving Data.Applicative via Old.Identity
   deriving Functor via Old.Identity
   deriving Applicative via Old.Identity
   deriving Monad via Old.Identity
