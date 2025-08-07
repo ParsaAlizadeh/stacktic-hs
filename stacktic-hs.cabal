@@ -64,6 +64,11 @@ library
         Language.Stacktic.Base,
         Language.Stacktic.Library,
         Language.Stacktic.Example,
+        Language.Stacktic.Linear.Base,
+        Language.Stacktic.Linear.Library,
+        Language.Stacktic.Linear.Example,
+        Control.Monad.Linear.Cont,
+        Control.Monad.Linear.Identity,
 
     -- Modules included in this library but not exported.
     other-modules:
@@ -76,6 +81,7 @@ library
         base ^>=4.21.0.0,
         mtl >= 2.3 && < 2.4,
         template-haskell >= 2.23 && < 2.24,
+        linear-base >= 0.5 && < 0.6,
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -111,3 +117,18 @@ test-suite stacktic-hs-test
         stacktic-hs,
         hspec,
         QuickCheck,
+
+test-suite stacktic-hs-linear-test
+    import:           warnings
+    default-language: Haskell2010
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Linear.hs
+    build-depends:
+        base,
+        stacktic-hs,
+        hspec,
+        QuickCheck,
+        linear-base,
